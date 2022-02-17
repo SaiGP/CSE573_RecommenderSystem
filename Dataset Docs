@@ -1,0 +1,28 @@
+English books records: (book_ids.json)
+goodreads_books_history_biography.json: 236157
+goodreads_books_children.json: 102749
+goodreads_books_young_adult.json: 65621
+goodreads_books_romance.json: 264521
+goodreads_books_poetry.json: 27855
+goodreads_books_mystery_thriller_crime.json: 162665
+goodreads_books_comics_graphic.json: 59134
+goodreads_books_fantasy_paranormal.json: 189871
+
+
+Sample Data size:(sample_ids.json)
+goodreads_books_history_biography.json : 23615 records
+goodreads_books_history_biography.json : 156498 records
+goodreads_books_children.json : 10274 records 
+goodreads_books_children.json : 57645 records
+goodreads_books_young_adult.json : 6562 records 
+goodreads_books_young_adult.json : 176677 records 
+goodreads_books_romance.json : 26452 records
+goodreads_books_romance.json : 269989 records
+goodreads_books_poetry.json : 2785 records
+goodreads_books_poetry.json : 10079 records
+goodreads_books_mystery_thriller_crime.json : 16266 records
+goodreads_books_mystery_thriller_crime.json : 130123 records
+goodreads_books_comics_graphic.json : 5913 records
+goodreads_books_comics_graphic.json : 44030 records
+goodreads_books_fantasy_paranormal.json : 18987 records
+goodreads_books_fantasy_paranormal.json : 274066 records 
