@@ -1,12 +1,21 @@
 import os
 import json
 import random
+'''
+#########################################################
+Project CSE 579 KRR: Recommender Goodreads Dataset.
+@authors:
 
+
+#########################################################
+'''
 datapath = "../Dataset/"
 rep_regex = r'}[\ \r\n"\r\n"]*{'
 
 
 def readjson():
+    # Get details of the Dataset
+    # Dataset link: https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home
     files = os.listdir(datapath)
     records = [["title", "records", "Keys_list"]]
 
@@ -32,6 +41,9 @@ def readjson():
 
 
 def enbooks():
+    
+    # Get the list of all books with language english or have no laguage specified.
+    
     files = os.listdir(datapath)
     # create a dict of list of book ids that have only english & save to file.
     book_list = {}
@@ -62,6 +74,10 @@ def enbooks():
 
 
 def rand_sample(n=10):
+    
+    # Create sample data with n% of the original data size. default value 10%
+    # considered only books and reviews for now.
+    
     book_path = "book_ids.json"
     en_book_file = open(book_path, 'r+')
     book_ids = json.load(en_book_file)
@@ -119,6 +135,9 @@ def check_book_ids():
     # print(data.keys[])
     for d in data.keys():
         print(d+": " + str(len(data[d])))
+
+        
+'''Uncomment the function you would like to run. its a one time execution'''
 
 # readjson()
 # enbooks()
