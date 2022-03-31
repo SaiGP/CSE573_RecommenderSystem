@@ -2,9 +2,9 @@
 
 **Dataset**:
 
-Good reads: https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home
-Main dataset link: https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home
-Gdrive link: https://drive.google.com/drive/folders/1Dwh7KL0EGTq-zjTzy6rzMdBlcTJKI-eL?usp=sharing
+Good reads: https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home\\
+Main dataset link: https://sites.google.com/eng.ucsd.edu/ucsdbookgraph/home\\
+Gdrive link: https://drive.google.com/drive/folders/1Dwh7KL0EGTq-zjTzy6rzMdBlcTJKI-eL?usp=sharing\\
 
 10% data link: https://drive.google.com/drive/folders/1knNVLlO62on75TGaCvgYGQhoTiLd7Y_M?usp=sharing
 
