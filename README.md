@@ -33,5 +33,5 @@ Contains all the users reviews for all the english books. Total 11619419 records
 3. train_data.json: (90% review data)
 
 
-4. test_data.json: (10% review data)
+4. test_data.json: (10% review data) https://drive.google.com/file/d/17NUNc0vnBTBG3CQWdwd_deW5puaV7Kkz/view?usp=sharing
 
