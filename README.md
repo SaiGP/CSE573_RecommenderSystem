@@ -21,6 +21,8 @@ Data for out use:
                             "format": data["format"],
                             "authors": data["authors"],
                             "genre": genre}
+   
+   LINK: https://drive.google.com/file/d/1bT46RdLCY6aTDSKpYxNJKAScEGGp8vxP/view?usp=sharing
                             
 2. review_data.json: fields {"user_id": data["user_id"],
                               "book_id": data["book_id"],
