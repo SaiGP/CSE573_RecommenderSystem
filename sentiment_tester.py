@@ -29,6 +29,6 @@ def sentiment_tester(*sentiment_functions):
             print("===================================")
 
 
-temp = VaderSentiment()
+# temp = VaderSentiment()
 sentiment_tester(temp.predict_sentiment,text_blob_prediction)
 
