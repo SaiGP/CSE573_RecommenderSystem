@@ -3,6 +3,7 @@ This custom sentiment analysis tool is based on an example given by Ashley Ginge
 It can be found at https://ashleygingeleski.com/2021/03/31/sentiment-analysis-of-product-reviews-with-python-using-nltk/
 """
 
+import re
 import numpy as np
 import pandas as pd
 import nltk
@@ -17,6 +18,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from nltk.tokenize import RegexpTokenizer
 import scipy.sparse
 from sklearn.naive_bayes import CategoricalNB
+from sklearn.ensemble import RandomForestClassifier
 
 def tokenize_review(review):
     stop_words = set(stopwords.words('english') + list(string.punctuation))
@@ -221,9 +223,13 @@ class InputFormatter:
         temp["Token"].replace("'","")
         temp.sort_values(by=["Token"])
         self.tokens =  temp["Token"].values.tolist()
+        self.tokens.sort()
 
-        self.count_vectorizer = CountVectorizer(lowercase=True,stop_words='english',ngram_range = (1,3),binary=True)
-        self.count_vectorizer.fit_transform(self.tokens)
+        self.count_vectorizer = CountVectorizer(lowercase=True,ngram_range = (1,3),binary=True)
+        self.count_vectorizer.fit(self.tokens)
+        self.count_vectorizer.vocabulary_ = dict()
+        for current in enumerate(self.tokens):
+            self.count_vectorizer.vocabulary_[current[1]] = current[0]
 
     def build_dataset(self, input_path, output_path):
         with open(input_path, "r") as reviews:
@@ -261,10 +267,12 @@ class InputFormatter:
         for x in range(len(input)):
             if input[x] == 1:
                 temp.append(x)
-        print(temp)
+        # print(temp)
+        found_keys = []
         for current_key in self.count_vectorizer.vocabulary_:
             if self.count_vectorizer.vocabulary_[current_key] in temp:
-                print(current_key)
+                found_keys.append(current_key)
+        print(found_keys)
 
 def train_nb_classifier():
     a = scipy.sparse.load_npz("train_sentiment.npz").toarray()
@@ -291,12 +299,78 @@ def build_custom_nb_classifier(training_data):
 class NaiveBayesClassifier:
     def __init__(self, likelihood_path, prior_path):
         self.likelihoods = np.loadtxt(likelihood_path, delimiter=",", dtype=np.longdouble)
+        self.negative_likelihoods = np.log(1.0 - np.exp(self.likelihoods))
         self.prior = np.loadtxt(prior_path, delimiter=",", dtype=np.longdouble)
 
     def predict(self, input_values):
         rating_values = np.dot(self.likelihoods,input_values.T).T + self.prior
+        rating_values += np.dot(self.negative_likelihoods, 1.0 - input_values.T).T
         return np.argmax(rating_values,axis=1) + 1
 
+    def rating_likelihood(self, input_values):
+        rating_values = np.dot(self.likelihoods,input_values.T).T + self.prior
+        rating_values += np.dot(self.negative_likelihoods, 1.0 - input_values.T).T
+        return rating_values / rating_values.sum()
+
+    def rating_likelihoods(self, input_values):
+        rating_values = np.dot(self.likelihoods,input_values.T).T + self.prior
+        rating_values += np.dot(self.negative_likelihoods, 1.0 - input_values.T).T
+        return rating_values / rating_values.sum(axis=1)[:,None]
+
+def build_random_forest_classifier(train_data, pieces):
+    csc_data = train_data.tocsc()
+    sample_size = csc_data.shape[0] // pieces
+
+    for current_piece in range(pieces - 1):
+        print(current_piece)
+        #10,457,477 (363716, 262059, 673933, 1974756, 3502284, 3680729)
+        #  class_weight={1: 5, 2: 4, 3: 1, 4: 1, 5: 1}
+        # class_weight="balanced_subsample"
+        current_forest = RandomForestClassifier(n_estimators=20, class_weight={1: 10, 2: 5, 3: 0.01, 4: 0.006, 5: 0.006}
+                                                , min_impurity_decrease=0.000000001, max_depth=300, max_samples=0.7)
+        print()
+        temp_sample = csc_data[current_piece * sample_size: (current_piece + 1) * sample_size].toarray()
+        print(temp_sample[:, :-1].shape, temp_sample[:, -1].shape)
+        current_forest.fit(temp_sample[:, :-1], temp_sample[:, -1])
+
+        with open('rf_classifier' + str(current_piece) + '.pkl', 'wb') as rf_file:
+            pickle.dump(current_forest, rf_file)
+
+    final_temp_forest = RandomForestClassifier(n_estimators=20, class_weight={1: 10, 2: 5, 3: 0.01, 4: 0.006, 5: 0.006}
+                                                , min_impurity_decrease=0.000000001, max_depth=300, max_samples=0.7)
+    final_temp_sample = csc_data[sample_size * (pieces - 1):].toarray()
+    print(final_temp_sample[:, :-1].shape, final_temp_sample[:, -1].shape)
+    final_temp_forest.fit(final_temp_sample[:, :-1], final_temp_sample[:, -1])
+
+    with open('rf_classifier' + str(pieces - 1) + '.pkl', 'wb') as rf_file:
+        pickle.dump(final_temp_forest, rf_file)
+
+    final_forest = None
+    for current_piece in range(pieces):
+        with open('rf_classifier' + str(current_piece) + '.pkl', 'rb') as rf_file:
+            random_forest_classifier = pickle.load(rf_file)
+            if final_forest is None:
+                final_forest = random_forest_classifier
+            else:
+                final_forest.estimators_ += random_forest_classifier.estimators_
+    final_forest.n_estimators = len(final_forest.estimators_)
+
+    with open('rf_classifier.pkl', 'wb') as rf_file:
+        pickle.dump(final_forest, rf_file)
+
+def test_random_forest_classifier(test_data):
+    with open('rf_classifier.pkl', 'rb') as rf_file:
+        random_forest_classifier = pickle.load(rf_file)
+        return random_forest_classifier.predict(test_data[:,:-1].toarray())
+
+
+class RandomForestClassifier:
+    def __init__(self):
+        with open('rf_classifier.pkl', 'rb') as rf_file:
+            self.trained_model = pickle.load(rf_file)
+
+    def predict(self, target):
+        return self.trained_model.predict(target)
 
 # test = InputFormatter()
 
@@ -314,11 +388,14 @@ class NaiveBayesClassifier:
 # train_nb_classifier()
 
 
-a = scipy.sparse.load_npz("test_sentiment.npz").toarray()
-
+# a = scipy.sparse.load_npz("train_sentiment.npz").tocsc()
+# build_random_forest_classifier(a,50)
+# a = scipy.sparse.load_npz("test_sentiment.npz").toarray()
+# predictions = test_random_forest_classifier(a)
 # build_custom_nb_classifier(a)
-temp = NaiveBayesClassifier("nb_likelihoods.csv", "nb_rating_likelihood.csv")
-print(temp.predict(a[:,:-1]))
+# temp = NaiveBayesClassifier("nb_likelihoods.csv", "nb_rating_likelihood.csv")
+# print(temp.predict(a[:,:-1]))
+# exit()
 #
 # predictions = temp.predict(a[:,:-1])
 # absolute_error = np.abs(predictions - a[:,-1]).sum() / a.shape[0]
@@ -328,4 +405,54 @@ print(temp.predict(a[:,:-1]))
 #     conf_mat[actual, prediction] += 1
 #
 # print(absolute_error)
-# np.savetxt("nb_conf_mat.csv", conf_mat, delimiter=",")
+# np.savetxt("rf_conf_mat.csv", conf_mat, delimiter=",")
+
+def most_positive_negative():
+
+    formatter = InputFormatter()
+    book_best_sentiment_representations = dict()
+
+    with open("train_data.json", "r") as reviews:
+        count = 1
+        nb_classifier = NaiveBayesClassifier("nb_likelihoods.csv", "nb_rating_likelihood.csv")
+        for current_line in reviews:
+            for current_review in json.loads(current_line):
+                print(count)
+                count += 1
+                temp = formatter.format_review(current_review['review_text'])
+                likelihoods = nb_classifier.rating_likelihood(temp)
+                max_likelihood = np.argmax(likelihoods)
+                current_book = current_review['book_id']
+
+                if current_book not in book_best_sentiment_representations:
+                    temp_sent = [(0.0,None), (0.0, None), (0.0, None), (0.0, None), (0.0, None)]
+                    temp_sent[max_likelihood] = (likelihoods[max_likelihood], current_review['review_text'])
+                    book_best_sentiment_representations[current_book] = temp_sent
+                else:
+                    current_book_best_sentiments = book_best_sentiment_representations[current_book]
+                    if current_book_best_sentiments[max_likelihood][0] < likelihoods[max_likelihood]:
+                        current_book_best_sentiments[max_likelihood] = (likelihoods[max_likelihood], current_review['review_text'])
+                        book_best_sentiment_representations[current_book] = current_book_best_sentiments
+
+    with open("sentiment_book_ratings.json", "w+") as output:
+        json.dump(book_best_sentiment_representations, output)
+
+
+
+# most_positive_negative()
+
+# with open("sentiment_book_ratings.json", "r") as input:
+#     temp = json.load(input)
+#     print(temp["7462184"])
+
+# with open("train_data.json", "r") as reviews:
+#     count = 1
+#     nb_classifier = NaiveBayesClassifier("nb_likelihoods.csv", "nb_rating_likelihood.csv")
+#     for current_line in reviews:
+#         for current_review in json.loads(current_line):
+#             print(json.dumps(current_review, indent=4, sort_keys=True))
+#             print()
+#             print()
+#             count += 1
+#             if count > 10:
+#                 exit()
