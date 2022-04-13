@@ -35,3 +35,12 @@ Contains all the users reviews for all the english books. Total 11619419 records
 
 4. test_data.json: (10% review data) https://drive.google.com/file/d/17NUNc0vnBTBG3CQWdwd_deW5puaV7Kkz/view?usp=sharing
 
+
+5. Sentiment_Analysis_Data.rar https://drive.google.com/file/d/1aOaTEsaCNNmTcmHBa1yCOOMTal1BTaJS/view?usp=sharing
+* complexest_tokens_freq.xlsx: Word frequency Excel Document
+* nb_likelihoods.csv: likelihood percentages for the trained Naive Bayes Classifier
+* nb_rating_likelihoods.csv: rating priors for the trained Naive Bayes Classifier
+* rf_classifier.pkl: pickeled trained random forest model
+* sentiment_book_ratings.json: Top sentiment ratings for each rating for each book in the training dataset
+* test_sentiment.json: testing dataset for the sentiment analysis models
+* train_sentiment.json: training dataset for the sentiment analysis models 
