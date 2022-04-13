@@ -44,3 +44,6 @@ Contains all the users reviews for all the english books. Total 11619419 records
 * sentiment_book_ratings.json: Top sentiment ratings for each rating for each book in the training dataset
 * test_sentiment.json: testing dataset for the sentiment analysis models
 * train_sentiment.json: training dataset for the sentiment analysis models 
+
+
+6. Google Drive Link https://drive.google.com/drive/folders/1Dwh7KL0EGTq-zjTzy6rzMdBlcTJKI-eL?usp=sharing
