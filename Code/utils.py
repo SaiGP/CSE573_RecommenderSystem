@@ -25,7 +25,6 @@ class Util(object):
         book_ids = pd.read_csv((base_path / "data/book_ids.csv").resolve())
 
         return ratings, to_read, books, book_ids
-        # return ratings, book_ids
 
     def clean_subset(self, ratings, num_rows):
         '''
