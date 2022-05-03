@@ -32,25 +32,7 @@ args = parser.parse_args()
 
 def main():
 
-    # print('Converting json to csv')
-    # base_path = Path(__file__).parent
-    # print('Base path : ', base_path)
-    #
-    # with open((base_path / "data/reviews_list.json").resolve()) as json_file:
-    #     jsondata = json.load(json_file)
-    #
-    # data_file = open((base_path / "data/reviews_list.csv").resolve(), 'w', newline='', encoding='utf-8')
-    # csv_writer = csv.writer(data_file)
-    #
-    # count = 0
-    # for data in jsondata:
-    #     if count == 0:
-    #         header = data.keys()
-    #         csv_writer.writerow(header)
-    #         count += 1
-    #     csv_writer.writerow(data.values())
-    #
-    # data_file.close()
+
 
     # print('Converting review_data.json to csv ')
     # base_path = Path(__file__).parent
